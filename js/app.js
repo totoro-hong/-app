@@ -378,20 +378,15 @@ function cardHTML(item, type, groupKey) {
     subtitle = item.repeat ? `每年 ${item.dateStr.slice(5)}` : item.dateStr;
   }
 
-  let badgeLine1, badgeLine2;
+  let timeHtml;
   if (isToday) {
-    badgeLine1 = '🎉';
-    badgeLine2 = '就是今天';
+    timeHtml = '<div class="card-time"><span class="card-time-main">🎉</span><span class="card-time-sub">就是今天</span></div>';
   } else {
     const ymd = formatYMD(item.ymd, type);
     const m = ymd.match(/^(.+?[年月])(.+)$/);
-    if (m) {
-      badgeLine1 = m[1];
-      badgeLine2 = m[2];
-    } else {
-      badgeLine1 = ymd;
-      badgeLine2 = '';
-    }
+    timeHtml = m
+      ? `<div class="card-time"><span class="card-time-main">${m[1]}</span><span class="card-time-sub">${m[2]}</span></div>`
+      : `<div class="card-time"><span class="card-time-main">${ymd}</span></div>`;
   }
 
   const quote = getRandomQuote(item.category);
@@ -402,16 +397,11 @@ function cardHTML(item, type, groupKey) {
         <button class="card-action-btn edit" data-id="${item.id}" title="编辑">✎</button>
         <button class="card-action-btn delete" data-id="${item.id}" title="删除">×</button>
       </div>
-      <div class="card-badge${isToday ? ' today' : ''}">
-        <span class="card-badge-line1">${badgeLine1}</span>
-        ${badgeLine2 ? `<span class="card-badge-line2">${badgeLine2}</span>` : ''}
-      </div>
-      <div class="card-body">
+      <div class="card-inner">
+        ${timeHtml}
         <div class="card-name">${item.name}</div>
-        <div class="card-meta">
-          <span class="card-date">📅 ${subtitle}</span>
-        </div>
-        ${item.note ? `<div class="card-note">✎ ${item.note}</div>` : ''}
+        <div class="card-date">📅 ${subtitle}</div>
+        ${item.note ? `<div class="card-note">${item.note}</div>` : ''}
         <div class="card-quote">${quote}</div>
       </div>
     </div>

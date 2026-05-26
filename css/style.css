@@ -252,49 +252,48 @@ body {
 }
 .category-divider:first-child { padding-top: 0; }
 
-/* ====== Card Group ====== */
-.card-group {
-  display: flex; flex-direction: column; gap: 10px;
+/* ====== Card List ====== */
+.card-list {
+  display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
+  padding-bottom: 8px;
 }
 
-/* ====== Card ====== */
+/* ====== Card Group ====== */
+.card-group {
+  display: flex; flex-wrap: wrap; gap: 14px; justify-content: center;
+}
+
+/* ====== Card (Circular) ====== */
 .card {
-  display: flex; align-items: center; gap: 14px;
-  padding: 14px 16px 14px 12px;
-  border-radius: var(--radius-pill);
+  width: 150px; height: 150px;
+  border-radius: 50%;
   background: var(--bg-card);
-  border: 1px solid rgba(196, 155, 94, 0.1);
+  border: 2px solid var(--gold-light);
   box-shadow: var(--shadow-card);
   position: relative;
+  flex-shrink: 0;
+  overflow: hidden;
   cursor: default;
   animation: cardRise 0.5s cubic-bezier(0.22,1,0.36,1) both;
   transition: transform 0.25s cubic-bezier(0.22,1,0.36,1),
               box-shadow 0.25s cubic-bezier(0.22,1,0.36,1),
-              background 0.3s ease, opacity 0.3s ease;
-  touch-action: pan-y;
+              background 0.3s ease;
   user-select: none;
 }
 
-.card::before {
-  content: ''; position: absolute; inset: 0;
-  border-radius: var(--radius-pill);
-  background: linear-gradient(135deg, transparent 60%, rgba(196,155,94,0.03));
-  pointer-events: none;
-}
-
 @media (hover: hover) {
-  .card:hover { transform: translateY(-1px); box-shadow: var(--shadow-elevated); }
+  .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-elevated); }
 }
-.card:active { transform: scale(0.985) !important; }
+.card:active { transform: scale(0.96) !important; }
 
-/* Category tint */
-.card-love        { border-left-color: var(--crimson); }
-.card-friendship  { border-left-color: var(--forest); }
-.card-family      { border-left-color: var(--golden); }
-.card-birthday    { border-left-color: var(--golden); }
-.card-anniversary { border-left-color: var(--crimson); }
-.card-self        { border-left-color: var(--slate); }
-.card-other       { border-left-color: var(--slate); }
+/* Category border colors */
+.card-love        { border-color: var(--crimson); }
+.card-friendship  { border-color: var(--forest); }
+.card-family      { border-color: var(--golden); }
+.card-birthday    { border-color: var(--golden); }
+.card-anniversary { border-color: var(--crimson); }
+.card-self        { border-color: var(--slate); }
+.card-other       { border-color: var(--slate); }
 
 /* Anim delay */
 .card:nth-child(1)  { animation-delay: 0.02s; }
@@ -306,85 +305,91 @@ body {
 .card:nth-child(7)  { animation-delay: 0.26s; }
 .card:nth-child(8)  { animation-delay: 0.30s; }
 
-/* ====== Card Badge (Circular) ====== */
-.card-badge {
-  width: 70px; height: 70px; border-radius: var(--radius-badge);
-  display: flex; flex-direction: column; align-items: center;
-  justify-content: center; flex-shrink: 0;
-  background: var(--gold-pale); border: 2px solid var(--gold-light);
-  transition: background 0.3s ease, border-color 0.3s ease;
-}
-
-.card-love .card-badge        { border-color: var(--crimson); }
-.card-friendship .card-badge  { border-color: var(--forest); }
-.card-family .card-badge      { border-color: var(--golden); }
-.card-birthday .card-badge    { border-color: var(--golden); }
-.card-anniversary .card-badge { border-color: var(--crimson); }
-.card-self .card-badge        { border-color: var(--slate); }
-.card-other .card-badge       { border-color: var(--slate); }
-
-.card-badge-line1 {
-  font-family: 'Georgia', 'Noto Serif SC', serif;
-  font-size: 0.82rem; font-weight: 700; line-height: 1.25;
+/* ====== Card Inner ====== */
+.card-inner {
+  position: absolute;
+  inset: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  gap: 1px;
+  overflow: hidden;
 }
 
-/* Badge number colors per category */
-.card-love .card-badge-line1        { color: var(--crimson); }
-.card-friendship .card-badge-line1  { color: var(--forest); }
-.card-family .card-badge-line1      { color: var(--golden); }
-.card-birthday .card-badge-line1    { color: var(--golden); }
-.card-anniversary .card-badge-line1 { color: var(--crimson); }
-.card-self .card-badge-line1        { color: var(--slate); }
-.card-other .card-badge-line1       { color: var(--slate); }
+/* ====== Time ====== */
+.card-time {
+  margin-bottom: 1px;
+  line-height: 1.2;
+}
+.card-time-main {
+  display: block;
+  font-family: 'Georgia', 'Noto Serif SC', serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--gold);
+}
 
-.card-badge-line2 {
-  font-size: 0.62rem; color: var(--ink-soft); margin-top: 1px;
+/* Time colors per category */
+.card-love .card-time-main        { color: var(--crimson); }
+.card-friendship .card-time-main  { color: var(--forest); }
+.card-family .card-time-main      { color: var(--golden); }
+.card-birthday .card-time-main    { color: var(--golden); }
+.card-anniversary .card-time-main { color: var(--crimson); }
+.card-self .card-time-main        { color: var(--slate); }
+.card-other .card-time-main       { color: var(--slate); }
+
+.card-time-sub {
+  display: block;
+  font-size: 0.62rem;
+  color: var(--ink-soft);
   font-weight: 500;
 }
 
-/* Badge today variant */
-.card-badge.today {
-  border-color: var(--gold); background: var(--gold-pale);
-}
-.card-badge.today .card-badge-line1 {
-  font-size: 2rem; color: var(--gold);
-}
-
-/* ====== Card Body ====== */
-.card-body { flex: 1; min-width: 0; }
-
 .card-name {
-  font-size: 0.92rem; font-weight: 600; color: var(--ink);
-  letter-spacing: 0.3px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink);
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.card-sub {
-  font-size: 0.72rem; color: var(--ink-soft);
-  margin-top: 1px;
-}
-
-.card-meta {
-  display: flex; align-items: center; gap: 6px;
-  margin-top: 3px;
-}
+/* ====== Date ====== */
 .card-date {
-  font-size: 0.7rem; color: var(--ink-faint);
-  letter-spacing: 0.3px;
+  font-size: 0.6rem;
+  color: var(--ink-faint);
+  line-height: 1.2;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* ====== Note ====== */
 .card-note {
-  font-size: 0.72rem; color: var(--ink-soft);
-  margin-top: 4px; line-height: 1.4;
+  font-size: 0.58rem;
+  color: var(--ink-soft);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ====== Quote ====== */
 .card-quote {
-  font-size: 0.68rem; color: var(--ink-faint);
+  font-size: 0.52rem;
+  color: var(--ink-faint);
   font-style: italic;
-  margin-top: 5px; padding-top: 5px;
+  line-height: 1.2;
+  max-width: 100%;
+  margin-top: 2px;
+  padding-top: 2px;
   border-top: 1px solid var(--gold-pale);
-  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -393,20 +398,25 @@ body {
 
 /* ====== Card Actions ====== */
 .card-actions {
-  position: absolute; top: 6px; right: 8px;
-  display: flex; gap: 3px;
-  opacity: 0; transition: opacity 0.2s;
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  display: flex;
+  gap: 2px;
+  opacity: 0;
   z-index: 5;
+  transition: opacity 0.2s;
 }
 .card:hover .card-actions,
 .card:focus-within .card-actions { opacity: 1; }
-@media (hover: none) { .card-actions { opacity: 1; } }
+@media (hover: none) { .card-actions { opacity: 0.5; } }
 
 .card-action-btn {
-  width: 26px; height: 26px; border-radius: 50%; border: none;
-  background: var(--bg); color: var(--ink-faint);
-  font-size: 0.82rem; line-height: 1; cursor: pointer;
+  width: 22px; height: 22px; border-radius: 50%; border: none;
+  background: var(--bg-card); color: var(--ink-faint);
+  font-size: 0.72rem; line-height: 1; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 1px 3px rgba(44,36,22,0.1);
   transition: all 0.2s;
 }
 .card-action-btn:hover { background: var(--gold-pale); color: var(--ink); }
@@ -415,8 +425,8 @@ body {
 /* ====== Dragging State ====== */
 .card.dragging {
   z-index: 10; opacity: 0.85;
-  transform: scale(1.03) !important;
-  box-shadow: 0 8px 32px rgba(44,36,22,0.15) !important;
+  transform: scale(1.05) !important;
+  box-shadow: 0 8px 32px rgba(44,36,22,0.2) !important;
   border-color: var(--gold) !important;
   cursor: grabbing;
 }
@@ -675,14 +685,12 @@ body {
 
 /* ====== Responsive ====== */
 @media (min-width: 541px) {
-  .card-badge { width: 76px; height: 76px; }
-  .card-badge-line1 { font-size: 0.9rem; }
   .card-list {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+    display: flex; flex-wrap: wrap; gap: 18px; justify-content: center;
   }
-  .card-group { gap: 12px; }
-  .category-divider { grid-column: 1 / -1; margin-top: 4px; }
-  .category-divider:first-child { margin-top: 0; }
+  .card { width: 165px; height: 165px; }
+  .card-group { gap: 18px; }
+  .category-divider { width: 100%; }
   .celebration-body { white-space: normal; }
 }
 
