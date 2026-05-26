@@ -65,5 +65,30 @@ const db = {
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
     });
+  },
+
+  async clear() {
+    const conn = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = conn.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      const req = store.clear();
+      req.onsuccess = () => resolve();
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  async exportAll() {
+    const items = await this.getAll();
+    return JSON.stringify(items, null, 2);
+  },
+
+  async importAll(items) {
+    await this.clear();
+    for (const item of items) {
+      const { id, ...rest } = item;
+      await this.add(rest);
+    }
+    return items.length;
   }
 };

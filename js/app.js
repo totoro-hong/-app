@@ -96,6 +96,37 @@ function formatYMD(ymd, type) {
   return text;
 }
 
+// ─── 里程碑检测 ─────────────────────────────────────
+
+const MILESTONES = [100, 365, 1000, 3650, 10000];
+let celebratedIds = new Set();
+
+function checkMilestones(items) {
+  const now = new Date();
+  const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+
+  for (const item of items) {
+    if (item.days > 0 && MILESTONES.includes(item.days)) {
+      const key = `${item.id}-${item.days}-${todayKey}`;
+      if (!celebratedIds.has(key)) {
+        celebratedIds.add(key);
+        showCelebration(item.name, item.days);
+        return;
+      }
+    }
+  }
+}
+
+function showCelebration(name, days) {
+  const el = document.getElementById('celebration');
+  const textEl = document.getElementById('celebration-text');
+  textEl.textContent = `${name} — ${days}天里程碑！`;
+
+  el.classList.add('show');
+  clearTimeout(el._timer);
+  el._timer = setTimeout(() => el.classList.remove('show'), 4500);
+}
+
 // ─── Toast ──────────────────────────────────────────────
 
 function showToast(msg) {
@@ -106,25 +137,52 @@ function showToast(msg) {
   el._timer = setTimeout(() => el.classList.remove('show'), 2000);
 }
 
+// ─── 自定义确认框 ───────────────────────────────────
+
+function showConfirm(msg) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('confirm-overlay');
+    const msgEl = document.getElementById('confirm-msg');
+    const okBtn = document.getElementById('confirm-ok');
+    const cancelBtn = document.getElementById('confirm-cancel');
+
+    msgEl.textContent = msg;
+    overlay.classList.add('show');
+
+    function cleanup(result) {
+      overlay.classList.remove('show');
+      okBtn.removeEventListener('click', onOk);
+      cancelBtn.removeEventListener('click', onCancel);
+      overlay.removeEventListener('click', onOverlay);
+      resolve(result);
+    }
+
+    function onOk() { cleanup(true); }
+    function onCancel() { cleanup(false); }
+    function onOverlay(e) { if (e.target === overlay) cleanup(false); }
+
+    okBtn.addEventListener('click', onOk);
+    cancelBtn.addEventListener('click', onCancel);
+    overlay.addEventListener('click', onOverlay);
+  });
+}
+
 // ─── 分类分组渲染 ─────────────────────────────────────
 
 function renderGroup(listEl, items, type) {
   const groups = type === 'passed' ? PASSED_GROUPS : UPCOMING_GROUPS;
 
-  // 初始化分组桶
   const buckets = {};
   groups.forEach((g) => (buckets[g.key] = []));
 
   items.forEach((item) => {
     const cat = item.category;
-    // 找到该 item 应属的分组
     for (const g of groups) {
       if (g.mapFrom.includes(cat)) {
         buckets[g.key].push(item);
         return;
       }
     }
-    // fallback: 放到第一个分组
     buckets[groups[0]?.key]?.push(item);
   });
 
@@ -169,6 +227,10 @@ function render() {
     renderGroup(passedList, passed, 'passed');
     renderGroup(upcomingList, upcoming, 'upcoming');
 
+    // 里程碑庆祝
+    checkMilestones(passed);
+    checkMilestones(upcoming);
+
     document.querySelectorAll('.card-action-btn.edit').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -176,16 +238,16 @@ function render() {
       });
     });
 
-    document.querySelectorAll('.card-action-btn.delete').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
+    document.querySelectorAll('.card-action-btn.delete').forEach(async (btn) => {
+      btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const id = Number(btn.dataset.id);
-        if (confirm('确定删除这条记录吗？')) {
-          db.remove(id).then(() => {
-            showToast('已删除');
-            render();
-          });
-        }
+        const confirmed = await showConfirm('确定删除这条记录吗？');
+        if (!confirmed) return;
+        db.remove(id).then(() => {
+          showToast('已删除');
+          render();
+        });
       });
     });
 
@@ -245,6 +307,50 @@ function cardHTML(item, type, groupKey) {
   `;
 }
 
+// ─── 搜索过滤 ────────────────────────────────────────
+
+let searchTimer = null;
+
+function setupSearch() {
+  const input = document.getElementById('search-input');
+
+  input.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      const q = input.value.trim().toLowerCase();
+      const activeSection = document.querySelector('.section.active');
+      if (!activeSection) return;
+      const cardList = activeSection.querySelector('.card-list');
+      if (!cardList) return;
+
+      const cards = cardList.querySelectorAll('.card');
+      const dividers = cardList.querySelectorAll('.category-divider');
+
+      let hasVisible = false;
+      cards.forEach((card) => {
+        const name = card.querySelector('.card-name').textContent.toLowerCase();
+        const match = !q || name.includes(q);
+        card.classList.toggle('search-hidden', !match);
+        if (match) hasVisible = true;
+      });
+
+      // 隐藏空分组标题
+      dividers.forEach((div) => {
+        let sibling = div.nextElementSibling;
+        let groupHasVisible = false;
+        while (sibling && !sibling.classList.contains('category-divider') && !sibling.classList.contains('empty-state')) {
+          if (sibling.classList.contains('card') && !sibling.classList.contains('search-hidden')) {
+            groupHasVisible = true;
+            break;
+          }
+          sibling = sibling.nextElementSibling;
+        }
+        div.classList.toggle('search-hidden', !groupHasVisible);
+      });
+    }, 150);
+  });
+}
+
 // ─── 编辑 ──────────────────────────────────────────────
 
 function startEdit(id) {
@@ -281,7 +387,7 @@ function handleSubmit(e) {
   const note = document.getElementById('event-note').value.trim();
 
   if (!name || !date) {
-    alert('请填写名称和日期');
+    showToast('请填写名称和日期');
     return;
   }
 
@@ -306,6 +412,108 @@ function resetForm() {
   document.getElementById('form-title').textContent = '记录新日子';
   document.getElementById('add-form-inner').reset();
   document.getElementById('event-date').valueAsDate = new Date();
+}
+
+// ─── 数据导出导入 ──────────────────────────────────────
+
+async function exportData() {
+  const json = await db.exportAll();
+  const blob = new Blob([json], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  const dateStr = new Date().toISOString().slice(0, 10);
+  a.download = `重要日子-备份-${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('数据已导出');
+}
+
+async function importData() {
+  const confirmed = await showConfirm('导入将覆盖现有数据，确定继续？');
+  if (!confirmed) return;
+
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.style.display = 'none';
+  document.body.appendChild(input);
+  input.click();
+
+  input.onchange = async () => {
+    const file = input.files[0];
+    if (!file) {
+      document.body.removeChild(input);
+      return;
+    }
+    try {
+      const text = await file.text();
+      const data = JSON.parse(text);
+      if (!Array.isArray(data)) throw new Error('格式错误');
+      const count = await db.importAll(data);
+      document.body.removeChild(input);
+      celebratedIds.clear();
+      showToast(`已导入 ${count} 条记录`);
+      render();
+    } catch (e) {
+      document.body.removeChild(input);
+      showToast('导入失败：文件格式不正确');
+    }
+  };
+}
+
+// ─── 暗色模式 ──────────────────────────────────────────
+
+function getPreferredTheme() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function getTheme() {
+  return localStorage.getItem('theme') || getPreferredTheme();
+}
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
+}
+
+function toggleTheme() {
+  const current = document.documentElement.getAttribute('data-theme') || 'light';
+  setTheme(current === 'dark' ? 'light' : 'dark');
+}
+
+// ─── Totoro 眨眼 ──────────────────────────────────────
+
+function setupTotoroBlink() {
+  const eyes = document.querySelectorAll('.totoro-eye');
+  const pupils = document.querySelectorAll('.totoro-pupil');
+
+  if (eyes.length === 0) return;
+
+  eyes.forEach(e => {
+    const cx = parseFloat(e.getAttribute('cx'));
+    const cy = parseFloat(e.getAttribute('cy'));
+    e.style.transformOrigin = `${cx}px ${cy}px`;
+    e.style.transition = 'transform 0.08s ease';
+  });
+  pupils.forEach(p => {
+    p.style.transition = 'opacity 0.08s ease';
+  });
+
+  function blink() {
+    eyes.forEach(e => e.style.transform = 'scaleY(0.06)');
+    pupils.forEach(p => p.style.opacity = '0');
+    setTimeout(() => {
+      eyes.forEach(e => e.style.transform = '');
+      pupils.forEach(p => p.style.opacity = '');
+    }, 120);
+  }
+
+  // 首次眨眼延迟
+  setTimeout(blink, 1500);
+  setInterval(blink, 4500);
 }
 
 // ─── 通知 ────────────────────────────────────────────
@@ -371,8 +579,24 @@ function setupForm() {
 // ─── 启动 ────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 暗色模式
+  setTheme(getTheme());
+
+  // 监听系统主题变更（无用户显式设置时）
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!localStorage.getItem('theme')) {
+      setTheme(e.matches ? 'dark' : 'light');
+    }
+  });
+
+  document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+  document.getElementById('btn-export').addEventListener('click', exportData);
+  document.getElementById('btn-import').addEventListener('click', importData);
+
   setupForm();
   render();
+  setupSearch();
+  setupTotoroBlink();
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
@@ -390,6 +614,11 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.section').forEach((s) => s.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById('section-' + tab.dataset.tab).classList.add('active');
+      // 切换 tab 时重新应用搜索过滤
+      const input = document.getElementById('search-input');
+      if (input.value.trim()) {
+        input.dispatchEvent(new Event('input'));
+      }
     });
   });
 });
