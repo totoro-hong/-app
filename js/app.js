@@ -1,3 +1,65 @@
+// ─── 引用库 ────────────────────────────────────────
+const QUOTES = {
+  love: [
+    '"我行过许多地方的桥，看过许多次数的云，喝过许多种类的酒，却只爱过一个正当最好年龄的人。" — 沈从文',
+    '"春风十里不如你。" — 冯唐',
+    '"爱情不是终日彼此对视，而是共同瞭望同一个方向。" — 《小王子》',
+    '"世间所有的相遇，都是久别重逢。" — 《一代宗师》',
+    '"一生一世一双人。" — 纳兰性德',
+    '"I wish I knew how to quit you." — 《断背山》',
+    '"你一笑，我的整个世界都亮了。"'
+  ],
+  friendship: [
+    '"朋友是时间的果实。" — 莎士比亚',
+    '"海内存知己，天涯若比邻。" — 王勃',
+    '"Friends are the family we choose." — 《老友记》',
+    '"山河不足重，重在遇知己。"',
+    '"A real friend is one who walks in when the rest of the world walks out."',
+    '"友谊是一颗心在两个身体里。" — 亚里士多德',
+    '"桃花潭水深千尺，不及汪伦送我情。" — 李白'
+  ],
+  family: [
+    '"家人闲坐，灯火可亲。" — 汪曾祺',
+    '"Home is where your story begins."',
+    '"Family is not an important thing, it\'s everything." — Michael J. Fox',
+    '"树欲静而风不止，子欲养而亲不待。"',
+    '"洛阳城里见秋风，欲作家书万意重。" — 张籍',
+    '"谁言寸草心，报得三春晖。" — 孟郊',
+    '"世界上最大的幸福之一，莫过于家人团聚。温馨的家，是最好的避风港。'
+  ],
+  birthday: [
+    '"愿你在被打击时，记起你的珍贵，抵抗恶意。" — 《熔炉》',
+    '"每个生日都是一个新的开始。"',
+    '"年龄只是数字，心态才是王道。"',
+    '"祝你不负光阴，不负自己。"',
+    '"愿你出走半生，归来仍是少年。" — 苏轼（佚名改编）'
+  ],
+  anniversary: [
+    '"愿有岁月可回首，且以深情共白头。" — 冯唐',
+    '"Love is not about how many days you\'ve been together. It\'s about how much you love each other every single day."',
+    '"执子之手，与子偕老。" — 《诗经》',
+    '"珍惜当下，便是最好的纪念。"',
+    '"所有值得珍惜的美好，都值得被记住。"'
+  ],
+  self: [
+    '"认识你自己。" — 苏格拉底',
+    '"To be yourself in a world that is constantly trying to make you something else is the greatest accomplishment." — Emerson',
+    '"人生如逆旅，我亦是行人。" — 苏轼',
+    '"做自己的光，不需要太亮，足以挨过黑夜和寒冬就好。"',
+    '"成长是一笔交易，用朴素的童真与未经人事的洁白交换长大的勇气。" — 宫崎骏'
+  ],
+  other: [
+    '"每一个日子都是礼物。"',
+    '"活在当下，珍惜所有。"',
+    '"Tomorrow is another day." — 《乱世佳人》',
+    '"生活不止眼前的苟且，还有诗和远方的田野。"',
+    '"不乱于心，不困于情，不畏将来，不念过往。" — 丰子恺'
+  ]
+};
+
+// 兼容旧分类
+QUOTES.met = QUOTES.friendship;
+
 // ─── 分类配置 ────────────────────────────────────────
 
 const CATEGORY_INFO = {
@@ -8,11 +70,9 @@ const CATEGORY_INFO = {
   anniversary:{ label: '纪念日', emoji: '💍' },
   self:       { label: '自我', emoji: '🌟' },
   other:      { label: '其他', emoji: '📌' },
-  // 旧数据兼容
   met:        { label: '友情', emoji: '🤝' }
 };
 
-// 已过 tab 分组：爱情、友情、亲情、自我
 const PASSED_GROUPS = [
   { key: 'love',       mapFrom: ['love', 'anniversary'] },
   { key: 'friendship',  mapFrom: ['friendship', 'met'] },
@@ -20,7 +80,6 @@ const PASSED_GROUPS = [
   { key: 'self',        mapFrom: ['self', 'birthday', 'other'] }
 ];
 
-// 还有 tab 分组：生日、纪念日、自我、其他
 const UPCOMING_GROUPS = [
   { key: 'birthday',    mapFrom: ['birthday'] },
   { key: 'anniversary', mapFrom: ['anniversary', 'love'] },
@@ -30,12 +89,18 @@ const UPCOMING_GROUPS = [
 
 // ─── 状态 ──────────────────────────────────────────────
 let editingId = null;
+let editingItem = null;
+let celebratedIds = new Set();
 
-// ─── 日期计算 ────────────────────────────────────────
+// ─── 工具函数 ──────────────────────────────────────
+
+function getRandomQuote(category) {
+  const quotes = QUOTES[category] || QUOTES.other;
+  return quotes[Math.floor(Math.random() * quotes.length)];
+}
 
 function daysBetween(a, b) {
-  const ms = b.getTime() - a.getTime();
-  return Math.round(ms / (1000 * 60 * 60 * 24));
+  return Math.round((b.getTime() - a.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function parseDate(str) {
@@ -73,8 +138,6 @@ function formatDate(d) {
   return `${y}.${m}.${day}`;
 }
 
-// ─── X年X月X天 转换 ──────────────────────────────────
-
 function daysToYMD(days) {
   if (days <= 0) return { years: 0, months: 0, days: 0 };
   const years = Math.floor(days / 365);
@@ -90,7 +153,6 @@ function formatYMD(ymd, type) {
   if (years > 0) parts.push(`${years}年`);
   if (months > 0) parts.push(`${months}月`);
   if (days > 0 || parts.length === 0) parts.push(`${days}天`);
-
   const text = parts.join('');
   if (type === 'passed') return `${text}前`;
   return text;
@@ -99,12 +161,10 @@ function formatYMD(ymd, type) {
 // ─── 里程碑检测 ─────────────────────────────────────
 
 const MILESTONES = [100, 365, 1000, 3650, 10000];
-let celebratedIds = new Set();
 
 function checkMilestones(items) {
   const now = new Date();
   const todayKey = `${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
-
   for (const item of items) {
     if (item.days > 0 && MILESTONES.includes(item.days)) {
       const key = `${item.id}-${item.days}-${todayKey}`;
@@ -121,7 +181,6 @@ function showCelebration(name, days) {
   const el = document.getElementById('celebration');
   const textEl = document.getElementById('celebration-text');
   textEl.textContent = `${name} — ${days}天里程碑！`;
-
   el.classList.add('show');
   clearTimeout(el._timer);
   el._timer = setTimeout(() => el.classList.remove('show'), 4500);
@@ -145,7 +204,6 @@ function showConfirm(msg) {
     const msgEl = document.getElementById('confirm-msg');
     const okBtn = document.getElementById('confirm-ok');
     const cancelBtn = document.getElementById('confirm-cancel');
-
     msgEl.textContent = msg;
     overlay.classList.add('show');
 
@@ -156,18 +214,56 @@ function showConfirm(msg) {
       overlay.removeEventListener('click', onOverlay);
       resolve(result);
     }
-
     function onOk() { cleanup(true); }
     function onCancel() { cleanup(false); }
     function onOverlay(e) { if (e.target === overlay) cleanup(false); }
-
     okBtn.addEventListener('click', onOk);
     cancelBtn.addEventListener('click', onCancel);
     overlay.addEventListener('click', onOverlay);
   });
 }
 
-// ─── 分类分组渲染 ─────────────────────────────────────
+// ─── 搜索过滤 ────────────────────────────────────────
+
+let searchTimer = null;
+
+function setupSearch() {
+  const input = document.getElementById('search-input');
+  input.addEventListener('input', () => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+      const q = input.value.trim().toLowerCase();
+      const activeSection = document.querySelector('.section.active');
+      if (!activeSection) return;
+      const cardList = activeSection.querySelector('.card-list');
+      if (!cardList) return;
+      const cards = cardList.querySelectorAll('.card');
+      const dividers = cardList.querySelectorAll('.category-divider');
+      const groups = cardList.querySelectorAll('.card-group');
+
+      let hasVisible = false;
+      cards.forEach((card) => {
+        const name = card.querySelector('.card-name')?.textContent.toLowerCase() || '';
+        const match = !q || name.includes(q);
+        card.classList.toggle('search-hidden', !match);
+        if (match) hasVisible = true;
+      });
+
+      groups.forEach((g) => {
+        const groupCards = g.querySelectorAll('.card:not(.search-hidden)');
+        g.classList.toggle('search-hidden', groupCards.length === 0);
+      });
+
+      dividers.forEach((div) => {
+        const nextGroup = div.nextElementSibling;
+        const hidden = !nextGroup || nextGroup.classList.contains('search-hidden');
+        div.classList.toggle('search-hidden', hidden && !!q);
+      });
+    }, 150);
+  });
+}
+
+// ─── 分组渲染 ─────────────────────────────────────
 
 function renderGroup(listEl, items, type) {
   const groups = type === 'passed' ? PASSED_GROUPS : UPCOMING_GROUPS;
@@ -186,6 +282,13 @@ function renderGroup(listEl, items, type) {
     buckets[groups[0]?.key]?.push(item);
   });
 
+  // 每组内按 sortOrder 排序
+  groups.forEach((g) => {
+    const cards = buckets[g.key];
+    if (!cards) return;
+    cards.sort((a, b) => (a.sortOrder ?? 999999) - (b.sortOrder ?? 999999));
+  });
+
   let html = '';
   groups.forEach((g) => {
     const cards = buckets[g.key];
@@ -193,7 +296,9 @@ function renderGroup(listEl, items, type) {
     const info = CATEGORY_INFO[g.key] || CATEGORY_INFO.other;
     const cls = g.key;
     html += `<div class="category-divider">${info.emoji} ${info.label}</div>`;
+    html += `<div class="card-group" data-type="${type}" data-group="${g.key}">`;
     html += cards.map((item) => cardHTML(item, type, cls)).join('');
+    html += `</div>`;
   });
 
   listEl.innerHTML = html;
@@ -227,32 +332,26 @@ function render() {
     renderGroup(passedList, passed, 'passed');
     renderGroup(upcomingList, upcoming, 'upcoming');
 
-    // 里程碑庆祝
     checkMilestones(passed);
     checkMilestones(upcoming);
 
+    // 编辑/删除事件
     document.querySelectorAll('.card-action-btn.edit').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        startEdit(Number(btn.dataset.id));
-      });
+      btn.addEventListener('click', (e) => { e.stopPropagation(); startEdit(Number(btn.dataset.id)); });
     });
-
-    document.querySelectorAll('.card-action-btn.delete').forEach(async (btn) => {
+    document.querySelectorAll('.card-action-btn.delete').forEach((btn) => {
       btn.addEventListener('click', async (e) => {
         e.stopPropagation();
         const id = Number(btn.dataset.id);
         const confirmed = await showConfirm('确定删除这条记录吗？');
         if (!confirmed) return;
-        db.remove(id).then(() => {
-          showToast('已删除');
-          render();
-        });
+        db.remove(id).then(() => { showToast('已删除'); render(); });
       });
     });
 
     checkNotifications(upcoming);
 
+    // 空状态
     document.querySelectorAll('.section').forEach((section) => {
       const list = section.querySelector('.card-list');
       const empty = section.querySelector('.empty-state');
@@ -260,11 +359,17 @@ function render() {
         empty.style.display = list.children.length === 0 ? 'block' : 'none';
       }
     });
+
+    // 初始化排序
+    initSortable();
   });
 }
 
+// ─── 卡片 HTML（圆形风格） ─────────────────────────
+
 function cardHTML(item, type, groupKey) {
   const cls = groupKey || 'self';
+  const isToday = item.days === 0;
 
   let subtitle;
   if (type === 'passed') {
@@ -273,81 +378,141 @@ function cardHTML(item, type, groupKey) {
     subtitle = item.repeat ? `每年 ${item.dateStr.slice(5)}` : item.dateStr;
   }
 
-  const displayText = item.days === 0
-    ? (type === 'passed' ? '就是今天' : '就是今天')
-    : formatYMD(item.ymd, type);
+  let badgeNum, badgeUnit, subText;
+  if (isToday) {
+    badgeNum = '🎉';
+    badgeUnit = '就是今天';
+    subText = '';
+  } else {
+    badgeNum = item.days;
+    badgeUnit = type === 'passed' ? '天前' : '天后';
+    subText = formatYMD(item.ymd, type);
+  }
+
+  const quote = getRandomQuote(item.category);
 
   return `
-    <div class="card card-${cls}">
+    <div class="card card-${cls}" data-id="${item.id}">
       <div class="card-actions">
         <button class="card-action-btn edit" data-id="${item.id}" title="编辑">✎</button>
         <button class="card-action-btn delete" data-id="${item.id}" title="删除">×</button>
       </div>
-      <div class="card-top-row">
-        <div class="card-days-wrap">
-          <span class="card-days">${displayText}</span>
+      <div class="card-badge${isToday ? ' today' : ''}">
+        <span class="card-badge-num">${badgeNum}</span>
+        <span class="card-badge-unit">${badgeUnit}</span>
+      </div>
+      <div class="card-body">
+        <div class="card-name">${item.name}</div>
+        ${subText ? `<div class="card-sub">${subText}</div>` : ''}
+        <div class="card-meta">
+          <span class="card-date">📅 ${subtitle}</span>
         </div>
+        ${item.note ? `<div class="card-note">✎ ${item.note}</div>` : ''}
+        <div class="card-quote">${quote}</div>
       </div>
-      <div class="card-name-wrap">
-        <span class="card-name">${item.name}</span>
-      </div>
-      <div class="card-meta">
-        <span class="card-date">
-          <span class="card-date-icon">📅</span>
-          ${subtitle}
-        </span>
-      </div>
-      ${item.note ? `
-        <div class="card-note">
-          <span class="card-note-icon">✎</span>
-          <span>${item.note}</span>
-        </div>
-      ` : ''}
     </div>
   `;
 }
 
-// ─── 搜索过滤 ────────────────────────────────────────
+// ─── 长按排序 ────────────────────────────────────────
 
-let searchTimer = null;
+function initSortable() {
+  document.querySelectorAll('.card-group').forEach((group) => {
+    if (group._sortableInited) return;
+    group._sortableInited = true;
 
-function setupSearch() {
-  const input = document.getElementById('search-input');
+    let dragEl = null;
+    let timer = null;
+    let isDragging = false;
+    let startY = 0;
+    let clone = null;
+    let dragOffsetY = 0;
 
-  input.addEventListener('input', () => {
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => {
-      const q = input.value.trim().toLowerCase();
-      const activeSection = document.querySelector('.section.active');
-      if (!activeSection) return;
-      const cardList = activeSection.querySelector('.card-list');
-      if (!cardList) return;
+    function onPointerDown(e) {
+      const card = e.target.closest('.card');
+      if (!card || e.target.closest('.card-action-btn, .card-actions')) return;
 
-      const cards = cardList.querySelectorAll('.card');
-      const dividers = cardList.querySelectorAll('.category-divider');
+      startY = e.clientY;
+      dragOffsetY = e.clientY - card.getBoundingClientRect().top;
 
-      let hasVisible = false;
-      cards.forEach((card) => {
-        const name = card.querySelector('.card-name').textContent.toLowerCase();
-        const match = !q || name.includes(q);
-        card.classList.toggle('search-hidden', !match);
-        if (match) hasVisible = true;
-      });
+      timer = setTimeout(() => {
+        isDragging = true;
+        dragEl = card;
+        card.classList.add('dragging');
 
-      // 隐藏空分组标题
-      dividers.forEach((div) => {
-        let sibling = div.nextElementSibling;
-        let groupHasVisible = false;
-        while (sibling && !sibling.classList.contains('category-divider') && !sibling.classList.contains('empty-state')) {
-          if (sibling.classList.contains('card') && !sibling.classList.contains('search-hidden')) {
-            groupHasVisible = true;
-            break;
+        clone = document.createElement('div');
+        clone.className = 'card drag-clone';
+        clone.style.height = card.offsetHeight + 'px';
+        clone.style.visibility = 'hidden';
+        card.parentNode.insertBefore(clone, card.nextSibling);
+
+        document.addEventListener('pointermove', onPointerMove);
+        document.addEventListener('pointerup', onPointerUp);
+      }, 500);
+    }
+
+    function onPointerMove(e) {
+      if (!isDragging || !dragEl) return;
+      e.preventDefault();
+
+      const y = e.clientY;
+      const parent = dragEl.parentNode;
+      const siblings = parent.querySelectorAll('.card:not(.dragging):not(.drag-clone)');
+
+      let inserted = false;
+      siblings.forEach((s) => {
+        const rect = s.getBoundingClientRect();
+        if (y >= rect.top && y <= rect.bottom && !inserted) {
+          const mid = rect.top + rect.height / 2;
+          if (y < mid) {
+            parent.insertBefore(dragEl, s);
+          } else {
+            parent.insertBefore(dragEl, s.nextSibling);
           }
-          sibling = sibling.nextElementSibling;
+          // Re-insert clone after dragEl
+          parent.insertBefore(clone, dragEl.nextSibling);
+          inserted = true;
         }
-        div.classList.toggle('search-hidden', !groupHasVisible);
       });
-    }, 150);
+    }
+
+    function onPointerUp() {
+      clearTimeout(timer);
+      if (isDragging && dragEl) {
+        dragEl.classList.remove('dragging');
+        if (clone && clone.parentNode) clone.parentNode.removeChild(clone);
+
+        // 保存新顺序
+        const order = [];
+        const parent = dragEl.parentNode;
+        const cards = parent.querySelectorAll('.card');
+        cards.forEach((c, i) => {
+          const id = Number(c.dataset.id);
+          if (id) order.push({ id, sortOrder: i });
+        });
+        if (order.length > 0) {
+          db.updateSortOrders(order);
+        }
+      }
+      isDragging = false;
+      dragEl = null;
+      clone = null;
+      document.removeEventListener('pointermove', onPointerMove);
+      document.removeEventListener('pointerup', onPointerUp);
+    }
+
+    group.addEventListener('pointerdown', onPointerDown);
+    group.addEventListener('pointerup', onPointerUp);
+    group.addEventListener('pointerleave', () => { clearTimeout(timer); });
+    group.addEventListener('touchmove', (e) => { if (isDragging) e.preventDefault(); }, { passive: false });
+
+    // 鼠标移动后取消长按
+    group.addEventListener('pointermove', (e) => {
+      if (timer && !isDragging && Math.abs(e.clientY - startY) > 10) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    });
   });
 }
 
@@ -358,7 +523,7 @@ function startEdit(id) {
   db.getAll().then((items) => {
     const item = items.find((i) => i.id === id);
     if (!item) return;
-
+    editingItem = item;
     document.getElementById('form-title').textContent = '编辑日子';
     document.getElementById('event-name').value = item.name;
     document.getElementById('event-date').value = item.date;
@@ -366,16 +531,12 @@ function startEdit(id) {
     document.getElementById('event-category').value = item.category;
     document.getElementById('event-repeat').checked = item.repeat || false;
     document.getElementById('event-note').value = item.note || '';
-
-    document.querySelectorAll('input[name="type"]').forEach((r) => {
-      r.dispatchEvent(new Event('change'));
-    });
-
+    document.querySelectorAll('input[name="type"]').forEach((r) => r.dispatchEvent(new Event('change')));
     showAddForm();
   });
 }
 
-// ─── 统一表单提交 ─────────────────────────────────────
+// ─── 表单提交 ─────────────────────────────────────
 
 function handleSubmit(e) {
   e.preventDefault();
@@ -386,23 +547,15 @@ function handleSubmit(e) {
   const repeat = document.getElementById('event-repeat').checked;
   const note = document.getElementById('event-note').value.trim();
 
-  if (!name || !date) {
-    showToast('请填写名称和日期');
-    return;
-  }
+  if (!name || !date) { showToast('请填写名称和日期'); return; }
 
   if (editingId !== null) {
-    db.update({ id: editingId, name, date, type, category, repeat, note }).then(() => {
-      editingId = null;
-      resetForm();
-      showToast('已更新');
-      render();
+    db.update({ ...editingItem, name, date, type, category, repeat, note }).then(() => {
+      editingId = null; editingItem = null; resetForm(); showToast('已更新'); render();
     });
   } else {
     db.add({ name, date, type, category, repeat, note }).then(() => {
-      resetForm();
-      showToast('已添加');
-      render();
+      resetForm(); showToast('已添加'); render();
     });
   }
 }
@@ -422,11 +575,8 @@ async function exportData() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  const dateStr = new Date().toISOString().slice(0, 10);
-  a.download = `重要日子-备份-${dateStr}.json`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
+  a.download = `重要日子-备份-${new Date().toISOString().slice(0, 10)}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
   URL.revokeObjectURL(url);
   showToast('数据已导出');
 }
@@ -434,20 +584,12 @@ async function exportData() {
 async function importData() {
   const confirmed = await showConfirm('导入将覆盖现有数据，确定继续？');
   if (!confirmed) return;
-
   const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = '.json';
-  input.style.display = 'none';
-  document.body.appendChild(input);
-  input.click();
-
+  input.type = 'file'; input.accept = '.json';
+  input.style.display = 'none'; document.body.appendChild(input); input.click();
   input.onchange = async () => {
     const file = input.files[0];
-    if (!file) {
-      document.body.removeChild(input);
-      return;
-    }
+    if (!file) { document.body.removeChild(input); return; }
     try {
       const text = await file.text();
       const data = JSON.parse(text);
@@ -455,8 +597,7 @@ async function importData() {
       const count = await db.importAll(data);
       document.body.removeChild(input);
       celebratedIds.clear();
-      showToast(`已导入 ${count} 条记录`);
-      render();
+      showToast(`已导入 ${count} 条记录`); render();
     } catch (e) {
       document.body.removeChild(input);
       showToast('导入失败：文件格式不正确');
@@ -489,7 +630,6 @@ function toggleTheme() {
 function setupTotoroBlink() {
   const eyes = document.querySelectorAll('.totoro-eye');
   const pupils = document.querySelectorAll('.totoro-pupil');
-
   if (eyes.length === 0) return;
 
   eyes.forEach(e => {
@@ -498,9 +638,7 @@ function setupTotoroBlink() {
     e.style.transformOrigin = `${cx}px ${cy}px`;
     e.style.transition = 'transform 0.08s ease';
   });
-  pupils.forEach(p => {
-    p.style.transition = 'opacity 0.08s ease';
-  });
+  pupils.forEach(p => { p.style.transition = 'opacity 0.08s ease'; });
 
   function blink() {
     eyes.forEach(e => e.style.transform = 'scaleY(0.06)');
@@ -511,21 +649,65 @@ function setupTotoroBlink() {
     }, 120);
   }
 
-  // 首次眨眼延迟
   setTimeout(blink, 1500);
   setInterval(blink, 4500);
+}
+
+// ─── 反馈提交 ────────────────────────────────────────
+
+function setupFeedback() {
+  const submitBtn = document.getElementById('feedback-submit');
+  const statusEl = document.getElementById('feedback-status');
+
+  submitBtn.addEventListener('click', async () => {
+    const content = document.getElementById('feedback-content').value.trim();
+    const category = document.getElementById('feedback-category').value;
+    const contact = document.getElementById('feedback-contact').value.trim();
+
+    if (!content) {
+      statusEl.textContent = '请填写反馈内容';
+      statusEl.style.color = 'var(--crimson)';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '提交中...';
+    statusEl.textContent = '';
+
+    try {
+      const res = await fetch('/api/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content, category, contact })
+      });
+      const data = await res.json();
+
+      if (data.ok) {
+        statusEl.textContent = '✅ 感谢你的反馈！';
+        statusEl.style.color = 'var(--forest)';
+        document.getElementById('feedback-content').value = '';
+        document.getElementById('feedback-contact').value = '';
+      } else {
+        statusEl.textContent = '❌ ' + (data.error || '提交失败，请稍后再试');
+        statusEl.style.color = 'var(--crimson)';
+      }
+    } catch (err) {
+      statusEl.textContent = '❌ 提交失败，请检查网络连接';
+      statusEl.style.color = 'var(--crimson)';
+    }
+
+    submitBtn.disabled = false;
+    submitBtn.textContent = '提交反馈';
+  });
 }
 
 // ─── 通知 ────────────────────────────────────────────
 
 function checkNotifications(upcoming) {
   if (!('Notification' in window)) return;
-
   const today = upcoming.filter((item) => item.days === 0);
   const tomorrow = upcoming.filter((item) => item.days === 1);
-
   if (today.length === 0 && tomorrow.length === 0) return;
-
   if (Notification.permission === 'granted') {
     sendNotif(today, tomorrow);
   } else if (Notification.permission === 'default') {
@@ -537,9 +719,7 @@ function checkNotifications(upcoming) {
 
 function sendNotif(today, tomorrow) {
   let body = '';
-  if (today.length > 0) {
-    body += '今天：' + today.map((item) => item.name).join('、');
-  }
+  if (today.length > 0) body += '今天：' + today.map((item) => item.name).join('、');
   if (tomorrow.length > 0) {
     if (body) body += '；';
     body += '明天：' + tomorrow.map((item) => item.name).join('、');
@@ -564,12 +744,12 @@ function hideAddForm() {
 function setupForm() {
   document.getElementById('add-form-inner').addEventListener('submit', handleSubmit);
   document.getElementById('modal-overlay').addEventListener('click', () => {
-    editingId = null;
+    editingId = null; editingItem = null;
     document.getElementById('form-title').textContent = '记录新日子';
     hideAddForm();
   });
   document.getElementById('btn-cancel').addEventListener('click', () => {
-    editingId = null;
+    editingId = null; editingItem = null;
     document.getElementById('form-title').textContent = '记录新日子';
     hideAddForm();
   });
@@ -579,14 +759,10 @@ function setupForm() {
 // ─── 启动 ────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 暗色模式
   setTheme(getTheme());
 
-  // 监听系统主题变更（无用户显式设置时）
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!localStorage.getItem('theme')) {
-      setTheme(e.matches ? 'dark' : 'light');
-    }
+    if (!localStorage.getItem('theme')) setTheme(e.matches ? 'dark' : 'light');
   });
 
   document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
@@ -597,13 +773,14 @@ document.addEventListener('DOMContentLoaded', () => {
   render();
   setupSearch();
   setupTotoroBlink();
+  setupFeedback();
 
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
   }
 
   document.getElementById('fab').addEventListener('click', () => {
-    editingId = null;
+    editingId = null; editingItem = null;
     document.getElementById('form-title').textContent = '记录新日子';
     showAddForm();
   });
@@ -614,11 +791,8 @@ document.addEventListener('DOMContentLoaded', () => {
       document.querySelectorAll('.section').forEach((s) => s.classList.remove('active'));
       tab.classList.add('active');
       document.getElementById('section-' + tab.dataset.tab).classList.add('active');
-      // 切换 tab 时重新应用搜索过滤
       const input = document.getElementById('search-input');
-      if (input.value.trim()) {
-        input.dispatchEvent(new Event('input'));
-      }
+      if (input.value.trim()) input.dispatchEvent(new Event('input'));
     });
   });
 });

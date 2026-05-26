@@ -1,5 +1,5 @@
 const DB_NAME = 'important-dates';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const STORE_NAME = 'dates';
 
 function openDB() {
@@ -28,6 +28,7 @@ const db = {
       const tx = conn.transaction(STORE_NAME, 'readwrite');
       const store = tx.objectStore(STORE_NAME);
       item.createdAt = new Date().toISOString();
+      item.sortOrder = item.sortOrder ?? Date.now();
       const req = store.add(item);
       req.onsuccess = () => { resolve(req.result); };
       req.onerror = () => reject(req.error);
@@ -64,6 +65,28 @@ const db = {
       const req = store.put(item);
       req.onsuccess = () => resolve(req.result);
       req.onerror = () => reject(req.error);
+    });
+  },
+
+  async updateSortOrders(orders) {
+    const conn = await openDB();
+    return new Promise((resolve, reject) => {
+      const tx = conn.transaction(STORE_NAME, 'readwrite');
+      const store = tx.objectStore(STORE_NAME);
+      let pending = orders.length;
+      orders.forEach(({ id, sortOrder }) => {
+        const getReq = store.get(id);
+        getReq.onsuccess = () => {
+          const item = getReq.result;
+          if (item) {
+            item.sortOrder = sortOrder;
+            store.put(item);
+          }
+          pending--;
+          if (pending === 0) resolve();
+        };
+        getReq.onerror = () => reject(getReq.error);
+      });
     });
   },
 

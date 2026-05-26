@@ -26,20 +26,35 @@
 
     <!-- ====== Header ====== -->
     <header class="header">
-      <div class="header-totoro"><svg viewBox="0 0 100 100" width="52" height="52">
-        <ellipse cx="32" cy="24" rx="8" ry="13" fill="#7a7a7a" transform="rotate(-18,32,24)"/>
-        <ellipse cx="68" cy="24" rx="8" ry="13" fill="#7a7a7a" transform="rotate(18,68,24)"/>
-        <ellipse cx="50" cy="60" rx="36" ry="34" fill="#8a8a8a"/>
-        <ellipse cx="50" cy="67" rx="24" ry="22" fill="#c8c0b0"/>
-        <ellipse class="totoro-eye" cx="37" cy="52" rx="6.5" ry="7.5" fill="#222"/>
-        <ellipse class="totoro-eye" cx="63" cy="52" rx="6.5" ry="7.5" fill="#222"/>
-        <circle class="totoro-pupil" cx="34.5" cy="49.5" r="3" fill="#fff"/>
-        <circle class="totoro-pupil" cx="60.5" cy="49.5" r="3" fill="#fff"/>
-        <ellipse cx="50" cy="62" rx="3.5" ry="2.5" fill="#444"/>
-        <line x1="18" y1="58" x2="39" y2="62" stroke="#777" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="18" y1="67" x2="39" y2="67" stroke="#777" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="82" y1="58" x2="61" y2="62" stroke="#777" stroke-width="1.8" stroke-linecap="round"/>
-        <line x1="82" y1="67" x2="61" y2="67" stroke="#777" stroke-width="1.8" stroke-linecap="round"/>
+      <div class="header-totoro"><svg viewBox="0 0 100 100" width="56" height="56">
+        <!-- Ears -->
+        <ellipse cx="28" cy="24" rx="7" ry="12" fill="#7d7d7d" transform="rotate(-15,28,24)"/>
+        <ellipse cx="72" cy="24" rx="7" ry="12" fill="#7d7d7d" transform="rotate(15,72,24)"/>
+        <!-- Body -->
+        <ellipse cx="50" cy="60" rx="32" ry="30" fill="#7d7d7d"/>
+        <!-- Belly -->
+        <ellipse cx="50" cy="66" rx="22" ry="20" fill="#c8c0b0"/>
+        <!-- Belly V pattern -->
+        <path d="M37 77 L50 58 L63 77" fill="none" stroke="#b3aa99" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Eyes -->
+        <ellipse class="totoro-eye" cx="36" cy="47" rx="7.5" ry="9" fill="#222"/>
+        <ellipse class="totoro-eye" cx="64" cy="47" rx="7.5" ry="9" fill="#222"/>
+        <circle class="totoro-pupil" cx="39" cy="44" r="4" fill="#fff"/>
+        <circle class="totoro-pupil" cx="61" cy="44" r="4" fill="#fff"/>
+        <!-- Nose -->
+        <ellipse cx="50" cy="56" rx="3.5" ry="2.5" fill="#444"/>
+        <!-- Grin -->
+        <path d="M43 63 Q50 69 57 63" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round"/>
+        <!-- Whiskers -->
+        <line x1="16" y1="53" x2="34" y2="55" stroke="#6a6a6a" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="16" y1="59" x2="34" y2="60" stroke="#6a6a6a" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="16" y1="65" x2="34" y2="65" stroke="#6a6a6a" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="84" y1="53" x2="66" y2="55" stroke="#6a6a6a" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="84" y1="59" x2="66" y2="60" stroke="#6a6a6a" stroke-width="1.5" stroke-linecap="round"/>
+        <line x1="84" y1="65" x2="66" y2="65" stroke="#6a6a6a" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- Feet -->
+        <ellipse cx="36" cy="87" rx="9" ry="5" fill="#7d7d7d"/>
+        <ellipse cx="64" cy="87" rx="9" ry="5" fill="#7d7d7d"/>
       </svg></div>
       <h1 class="header-title">重<span class="header-title-accent">要</span>日子</h1>
       <p class="header-sub">— 记录每一个值得纪念的瞬间 —</p>
@@ -118,6 +133,27 @@
       </div>
     </section>
 
+    <!-- ====== Feedback Section ====== -->
+    <section class="feedback-section" id="feedback-section">
+      <div class="feedback-divider"></div>
+      <div class="feedback-header">
+        <span class="feedback-emoji">💡</span>
+        <span class="feedback-title">优化建议箱</span>
+      </div>
+      <p class="feedback-desc">你的每一个建议，都让这个应用变得更好</p>
+      <div class="feedback-form">
+        <select id="feedback-category" class="feedback-select">
+          <option value="功能建议">💡 功能建议</option>
+          <option value="Bug反馈">🐛 问题反馈</option>
+          <option value="其他">📌 其他</option>
+        </select>
+        <input type="text" id="feedback-contact" class="feedback-input" placeholder="联系方式（选填，邮箱等）" autocomplete="off">
+        <textarea id="feedback-content" class="feedback-textarea" placeholder="详细描述你的建议或遇到的问题..." rows="3"></textarea>
+        <button class="feedback-btn" id="feedback-submit">提交反馈</button>
+        <p class="feedback-status" id="feedback-status"></p>
+      </div>
+    </section>
+
   </div>
 
   <!-- ====== FAB ====== -->
@@ -143,7 +179,6 @@
 
   <!-- ====== Celebration ====== -->
   <div class="celebration" id="celebration">
-    <div class="celebration-bg"></div>
     <div class="celebration-body">
       <span class="celebration-emoji">🎉</span>
       <span class="celebration-text" id="celebration-text"></span>
@@ -205,7 +240,7 @@
       </div>
 
       <div class="form-group">
-        <label for="event-note">备注<span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:normal;">（可选）</span></label>
+        <label for="event-note">备注<span style="color:var(--ink-faint);font-weight:400;text-transform:none;letter-spacing:normal;">（可选）</span></label>
         <textarea id="event-note" placeholder="添加备注…" rows="2"></textarea>
       </div>
 
