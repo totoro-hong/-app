@@ -1,4 +1,4 @@
-const CACHE_NAME = 'important-dates-v2';
+const CACHE_NAME = 'important-dates-v3';
 const ASSETS = [
   '/',
   '/index.html',
@@ -28,7 +28,16 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
 self.addEventListener('fetch', (event) => {
+  // API 请求不拦截
+  if (event.request.url.includes('/api/')) return;
+
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;

@@ -760,10 +760,12 @@ function setupForm() {
 
 async function seedTestData() {
   const items = await db.getAll();
-  if (items.length > 0) return;
+  // 已有测试数据则跳过
+  if (items.some((i) => i.name === '首马完赛')) return;
+  // 有旧数据但无测试数据 → 不清除，仅追加
+  const exists = new Set(items.map((i) => i.name));
 
   const testData = [
-    // 已过（7条，覆盖全部分类）
     { name: '恋爱纪念日', date: '2023-05-20', type: 'passed', category: 'love', repeat: true, note: '一见钟情的那天' },
     { name: '结婚纪念日', date: '2022-10-01', type: 'passed', category: 'anniversary', repeat: true, note: '最幸福的一天' },
     { name: '与挚友相识', date: '2016-09-01', type: 'passed', category: 'friendship', repeat: false, note: '大学宿舍认识的兄弟' },
@@ -771,7 +773,6 @@ async function seedTestData() {
     { name: '我的生日', date: '1995-08-15', type: 'passed', category: 'birthday', repeat: true },
     { name: '首马完赛', date: '2025-01-10', type: 'passed', category: 'self', repeat: false, note: '4小时28分完赛' },
     { name: '养了第一只猫', date: '2023-11-01', type: 'passed', category: 'other', repeat: false, note: '是一只橘猫 🐱' },
-    // 待来（7条，覆盖全部分类）
     { name: '朋友生日', date: '1996-07-15', type: 'upcoming', category: 'birthday', repeat: true },
     { name: '毕业纪念日', date: '2020-06-15', type: 'upcoming', category: 'anniversary', repeat: true },
     { name: '一起看演唱会', date: '2026-08-20', type: 'upcoming', category: 'love', repeat: false, note: '周杰伦演唱会！' },
@@ -782,7 +783,9 @@ async function seedTestData() {
   ];
 
   for (const data of testData) {
-    await db.add(data);
+    if (!exists.has(data.name)) {
+      await db.add(data);
+    }
   }
 }
 
@@ -807,7 +810,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   setupFeedback();
 
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
+    navigator.serviceWorker.register('/sw.js').then((reg) => {
+      // 检测到新 SW → 页面接管后自动刷新
+      if (reg.waiting) {
+        reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      }
+      reg.addEventListener('updatefound', () => {
+        const sw = reg.installing;
+        sw.addEventListener('statechange', () => {
+          if (sw.state === 'installed' && navigator.serviceWorker.controller) {
+            sw.postMessage({ type: 'SKIP_WAITING' });
+          }
+        });
+      });
+    });
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
   }
 
   document.getElementById('fab').addEventListener('click', () => {
