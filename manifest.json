@@ -1,7 +1,7 @@
 {
-  "name": "重要日子日历",
-  "short_name": "重要日子",
-  "description": "记录纪念日、生日等重要日子",
+  "name": "时光胶囊日历",
+  "short_name": "时光胶囊",
+  "description": "封存每一个值得珍藏的瞬间",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#0b0b16",
