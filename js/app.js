@@ -400,7 +400,7 @@ function cardHTML(item, type, groupKey) {
       <div class="card-inner">
         ${timeHtml}
         <div class="card-name">${item.name}</div>
-        <div class="card-date">📅 ${subtitle}</div>
+        <div class="card-date">${subtitle}</div>
         ${item.note ? `<div class="card-note">${item.note}</div>` : ''}
         <div class="card-quote">${quote}</div>
       </div>
