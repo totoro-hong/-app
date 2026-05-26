@@ -131,16 +131,17 @@ body {
 .header {
   padding: 36px 0 20px; text-align: center; position: relative;
 }
-.header-totoro {
-  margin-bottom: 6px; display: flex; justify-content: center;
-  animation: totoroBounce 2.8s ease-in-out infinite;
+.header-diamond {
+  margin-bottom: 8px; display: flex; justify-content: center;
+  animation: diamondSparkle 3s ease-in-out infinite;
 }
-.header-totoro svg { display: block; filter: drop-shadow(0 2px 8px rgba(44,36,22,0.06)); }
+.header-diamond svg { display: block; filter: drop-shadow(0 2px 8px rgba(196,155,94,0.25)); }
 
-@keyframes totoroBounce {
-  0%, 100% { transform: translateY(0); }
-  45%      { transform: translateY(-5px); }
-  55%      { transform: translateY(-5px); }
+@keyframes diamondSparkle {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  25%      { transform: scale(1.06) rotate(-3deg); filter: brightness(1.15); }
+  50%      { transform: scale(1) rotate(0deg); }
+  75%      { transform: scale(1.06) rotate(3deg); filter: brightness(1.15); }
 }
 
 .header-title {
@@ -322,23 +323,23 @@ body {
 .card-self .card-badge        { border-color: var(--slate); }
 .card-other .card-badge       { border-color: var(--slate); }
 
-.card-badge-num {
+.card-badge-line1 {
   font-family: 'Georgia', 'Noto Serif SC', serif;
-  font-size: 1.3rem; font-weight: 700; line-height: 1.1;
-  letter-spacing: -0.3px;
+  font-size: 0.82rem; font-weight: 700; line-height: 1.25;
+  text-align: center;
 }
 
 /* Badge number colors per category */
-.card-love .card-badge-num        { color: var(--crimson); }
-.card-friendship .card-badge-num  { color: var(--forest); }
-.card-family .card-badge-num      { color: var(--golden); }
-.card-birthday .card-badge-num    { color: var(--golden); }
-.card-anniversary .card-badge-num { color: var(--crimson); }
-.card-self .card-badge-num        { color: var(--slate); }
-.card-other .card-badge-num       { color: var(--slate); }
+.card-love .card-badge-line1        { color: var(--crimson); }
+.card-friendship .card-badge-line1  { color: var(--forest); }
+.card-family .card-badge-line1      { color: var(--golden); }
+.card-birthday .card-badge-line1    { color: var(--golden); }
+.card-anniversary .card-badge-line1 { color: var(--crimson); }
+.card-self .card-badge-line1        { color: var(--slate); }
+.card-other .card-badge-line1       { color: var(--slate); }
 
-.card-badge-unit {
-  font-size: 0.6rem; color: var(--ink-soft); margin-top: 1px;
+.card-badge-line2 {
+  font-size: 0.62rem; color: var(--ink-soft); margin-top: 1px;
   font-weight: 500;
 }
 
@@ -346,7 +347,7 @@ body {
 .card-badge.today {
   border-color: var(--gold); background: var(--gold-pale);
 }
-.card-badge.today .card-badge-num {
+.card-badge.today .card-badge-line1 {
   font-size: 2rem; color: var(--gold);
 }
 
@@ -674,8 +675,8 @@ body {
 
 /* ====== Responsive ====== */
 @media (min-width: 541px) {
-  .card-badge { width: 78px; height: 78px; }
-  .card-badge-num { font-size: 1.45rem; }
+  .card-badge { width: 76px; height: 76px; }
+  .card-badge-line1 { font-size: 0.9rem; }
   .card-list {
     display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
   }

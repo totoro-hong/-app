@@ -378,15 +378,20 @@ function cardHTML(item, type, groupKey) {
     subtitle = item.repeat ? `每年 ${item.dateStr.slice(5)}` : item.dateStr;
   }
 
-  let badgeNum, badgeUnit, subText;
+  let badgeLine1, badgeLine2;
   if (isToday) {
-    badgeNum = '🎉';
-    badgeUnit = '就是今天';
-    subText = '';
+    badgeLine1 = '🎉';
+    badgeLine2 = '就是今天';
   } else {
-    badgeNum = item.days;
-    badgeUnit = type === 'passed' ? '天前' : '天后';
-    subText = formatYMD(item.ymd, type);
+    const ymd = formatYMD(item.ymd, type);
+    const m = ymd.match(/^(.+?[年月])(.+)$/);
+    if (m) {
+      badgeLine1 = m[1];
+      badgeLine2 = m[2];
+    } else {
+      badgeLine1 = ymd;
+      badgeLine2 = '';
+    }
   }
 
   const quote = getRandomQuote(item.category);
@@ -398,12 +403,11 @@ function cardHTML(item, type, groupKey) {
         <button class="card-action-btn delete" data-id="${item.id}" title="删除">×</button>
       </div>
       <div class="card-badge${isToday ? ' today' : ''}">
-        <span class="card-badge-num">${badgeNum}</span>
-        <span class="card-badge-unit">${badgeUnit}</span>
+        <span class="card-badge-line1">${badgeLine1}</span>
+        ${badgeLine2 ? `<span class="card-badge-line2">${badgeLine2}</span>` : ''}
       </div>
       <div class="card-body">
         <div class="card-name">${item.name}</div>
-        ${subText ? `<div class="card-sub">${subText}</div>` : ''}
         <div class="card-meta">
           <span class="card-date">📅 ${subtitle}</span>
         </div>
@@ -625,34 +629,6 @@ function toggleTheme() {
   setTheme(current === 'dark' ? 'light' : 'dark');
 }
 
-// ─── Totoro 眨眼 ──────────────────────────────────────
-
-function setupTotoroBlink() {
-  const eyes = document.querySelectorAll('.totoro-eye');
-  const pupils = document.querySelectorAll('.totoro-pupil');
-  if (eyes.length === 0) return;
-
-  eyes.forEach(e => {
-    const cx = parseFloat(e.getAttribute('cx'));
-    const cy = parseFloat(e.getAttribute('cy'));
-    e.style.transformOrigin = `${cx}px ${cy}px`;
-    e.style.transition = 'transform 0.08s ease';
-  });
-  pupils.forEach(p => { p.style.transition = 'opacity 0.08s ease'; });
-
-  function blink() {
-    eyes.forEach(e => e.style.transform = 'scaleY(0.06)');
-    pupils.forEach(p => p.style.opacity = '0');
-    setTimeout(() => {
-      eyes.forEach(e => e.style.transform = '');
-      pupils.forEach(p => p.style.opacity = '');
-    }, 120);
-  }
-
-  setTimeout(blink, 1500);
-  setInterval(blink, 4500);
-}
-
 // ─── 反馈提交 ────────────────────────────────────────
 
 function setupFeedback() {
@@ -661,8 +637,6 @@ function setupFeedback() {
 
   submitBtn.addEventListener('click', async () => {
     const content = document.getElementById('feedback-content').value.trim();
-    const category = document.getElementById('feedback-category').value;
-    const contact = document.getElementById('feedback-contact').value.trim();
 
     if (!content) {
       statusEl.textContent = '请填写反馈内容';
@@ -678,7 +652,7 @@ function setupFeedback() {
       const res = await fetch('/api/feedback', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content, category, contact })
+        body: JSON.stringify({ content })
       });
       const data = await res.json();
 
@@ -766,19 +740,19 @@ async function seedTestData() {
   const exists = new Set(items.map((i) => i.name));
 
   const testData = [
-    { name: '恋爱纪念日', date: '2023-05-20', type: 'passed', category: 'love', repeat: true, note: '一见钟情的那天' },
-    { name: '结婚纪念日', date: '2022-10-01', type: 'passed', category: 'anniversary', repeat: true, note: '最幸福的一天' },
-    { name: '与挚友相识', date: '2016-09-01', type: 'passed', category: 'friendship', repeat: false, note: '大学宿舍认识的兄弟' },
-    { name: '家庭旅行', date: '2024-02-15', type: 'passed', category: 'family', repeat: false, note: '第一次全家出国游' },
+    { name: '恋爱纪念日', date: '2023-05-20', type: 'passed', category: 'love', repeat: true },
+    { name: '结婚纪念日', date: '2022-10-01', type: 'passed', category: 'anniversary', repeat: true },
+    { name: '与挚友相识', date: '2016-09-01', type: 'passed', category: 'friendship', repeat: false },
+    { name: '家庭旅行', date: '2024-02-15', type: 'passed', category: 'family', repeat: false },
     { name: '我的生日', date: '1995-08-15', type: 'passed', category: 'birthday', repeat: true },
-    { name: '首马完赛', date: '2025-01-10', type: 'passed', category: 'self', repeat: false, note: '4小时28分完赛' },
-    { name: '养了第一只猫', date: '2023-11-01', type: 'passed', category: 'other', repeat: false, note: '是一只橘猫 🐱' },
+    { name: '首马完赛', date: '2025-01-10', type: 'passed', category: 'self', repeat: false },
+    { name: '养了第一只猫', date: '2023-11-01', type: 'passed', category: 'other', repeat: false },
     { name: '朋友生日', date: '1996-07-15', type: 'upcoming', category: 'birthday', repeat: true },
     { name: '毕业纪念日', date: '2020-06-15', type: 'upcoming', category: 'anniversary', repeat: true },
-    { name: '一起看演唱会', date: '2026-08-20', type: 'upcoming', category: 'love', repeat: false, note: '周杰伦演唱会！' },
+    { name: '一起看演唱会', date: '2026-08-20', type: 'upcoming', category: 'love', repeat: false },
     { name: '年度体检', date: '2026-06-01', type: 'upcoming', category: 'self', repeat: false },
-    { name: '项目截止日', date: '2026-06-30', type: 'upcoming', category: 'other', repeat: false, note: '记得提前准备' },
-    { name: '老友聚会', date: '2026-07-01', type: 'upcoming', category: 'friendship', repeat: false, note: '约了半年了' },
+    { name: '项目截止日', date: '2026-06-30', type: 'upcoming', category: 'other', repeat: false },
+    { name: '老友聚会', date: '2026-07-01', type: 'upcoming', category: 'friendship', repeat: false },
     { name: '家庭出游', date: '2026-08-10', type: 'upcoming', category: 'family', repeat: false }
   ];
 
@@ -806,7 +780,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   await seedTestData();
   render();
   setupSearch();
-  setupTotoroBlink();
   setupFeedback();
 
   if ('serviceWorker' in navigator) {
