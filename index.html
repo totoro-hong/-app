@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0b0b16">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="icons/icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <title>重要日子</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ====== Background ====== -->
+  <div class="bg-texture">
+    <div class="bg-orb bg-orb-1"></div>
+    <div class="bg-orb bg-orb-2"></div>
+  </div>
+
+  <!-- ====== App Container ====== -->
+  <div class="app-container">
+
+    <!-- ====== Header ====== -->
+    <header class="header">
+      <div class="header-totoro"><svg viewBox="0 0 100 100" width="52" height="52">
+        <ellipse cx="32" cy="24" rx="8" ry="13" fill="#7a7a7a" transform="rotate(-18,32,24)"/>
+        <ellipse cx="68" cy="24" rx="8" ry="13" fill="#7a7a7a" transform="rotate(18,68,24)"/>
+        <ellipse cx="50" cy="60" rx="36" ry="34" fill="#8a8a8a"/>
+        <ellipse cx="50" cy="67" rx="24" ry="22" fill="#c8c0b0"/>
+        <ellipse cx="37" cy="52" rx="6.5" ry="7.5" fill="#222"/>
+        <ellipse cx="63" cy="52" rx="6.5" ry="7.5" fill="#222"/>
+        <circle cx="34.5" cy="49.5" r="3" fill="#fff"/>
+        <circle cx="60.5" cy="49.5" r="3" fill="#fff"/>
+        <ellipse cx="50" cy="62" rx="3.5" ry="2.5" fill="#444"/>
+        <line x1="18" y1="58" x2="39" y2="62" stroke="#777" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="18" y1="67" x2="39" y2="67" stroke="#777" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="82" y1="58" x2="61" y2="62" stroke="#777" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="82" y1="67" x2="61" y2="67" stroke="#777" stroke-width="1.8" stroke-linecap="round"/>
+      </svg></div>
+      <h1 class="header-title">重<span class="header-title-accent">要</span>日子</h1>
+      <p class="header-sub">— 记录每一个值得纪念的瞬间 —</p>
+      <div class="header-rule">
+        <span class="header-rule-line"></span>
+        <span class="header-rule-dot"></span>
+        <span class="header-rule-line"></span>
+      </div>
+    </header>
+
+    <!-- ====== Tab Bar ====== -->
+    <nav class="tab-bar">
+      <button class="tab-btn active" data-tab="passed">
+        <span>已经</span>
+        <span class="tab-count" id="passed-count">0</span>
+      </button>
+      <button class="tab-btn" data-tab="upcoming">
+        <span>还有</span>
+        <span class="tab-count" id="upcoming-count">0</span>
+      </button>
+    </nav>
+
+    <!-- ====== Passed Section ====== -->
+    <section class="section active" id="section-passed">
+      <div class="card-list" id="passed-list"></div>
+      <div class="empty-state" id="empty-passed">
+        <div class="empty-state-icon">🕰️</div>
+        <p class="empty-state-title">还没有已过的记录</p>
+        <p class="empty-state-hint">点击右下角 + 添加重要日子</p>
+      </div>
+    </section>
+
+    <!-- ====== Upcoming Section ====== -->
+    <section class="section" id="section-upcoming">
+      <div class="card-list" id="upcoming-list"></div>
+      <div class="empty-state" id="empty-upcoming">
+        <div class="empty-state-icon">🎋</div>
+        <p class="empty-state-title">还没有待来的记录</p>
+        <p class="empty-state-hint">点击右下角 + 添加期待的日子</p>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- ====== FAB ====== -->
+  <div class="fab-wrap">
+    <button class="fab" id="fab" aria-label="添加">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <line x1="12" y1="4" x2="12" y2="20" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+        <line x1="4" y1="12" x2="20" y2="12" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- ====== Modal Overlay ====== -->
+  <div class="modal-overlay" id="modal-overlay"></div>
+
+  <!-- ====== Add Form (Bottom Sheet) ====== -->
+  <div class="add-form" id="add-form">
+    <div class="add-form-handle">
+      <span class="add-form-handle-bar"></span>
+    </div>
+    <h2 class="add-form-title" id="form-title">记录新日子</h2>
+    <form id="add-form-inner">
+      <div class="form-group">
+        <label for="event-name">名称</label>
+        <input type="text" id="event-name" placeholder="例：恋爱纪念日" required>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group form-half">
+          <label>类型</label>
+          <div class="radio-group">
+            <input type="radio" name="type" id="type-passed" value="passed" checked>
+            <label for="type-passed">已过</label>
+            <input type="radio" name="type" id="type-upcoming" value="upcoming">
+            <label for="type-upcoming">待来</label>
+          </div>
+        </div>
+        <div class="form-group form-half">
+          <label for="event-category">分类</label>
+          <div class="select-wrap">
+            <select id="event-category">
+              <option value="love">❤️ 爱情</option>
+              <option value="friendship">🤝 友情</option>
+              <option value="family">👨‍👩‍👧 亲情</option>
+              <option value="birthday">🎂 生日</option>
+              <option value="anniversary">💍 纪念日</option>
+              <option value="self">🌟 自我</option>
+              <option value="other">📌 其他</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="event-date">日期</label>
+        <input type="date" id="event-date" required>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" id="event-repeat" checked>
+          <span class="checkbox-custom"></span>
+          <span class="checkbox-text">每年重复</span>
+        </label>
+      </div>
+
+      <div class="form-group">
+        <label for="event-note">备注<span style="color:var(--text-faint);font-weight:400;text-transform:none;letter-spacing:normal;">（可选）</span></label>
+        <textarea id="event-note" placeholder="添加备注…" rows="2"></textarea>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancel" id="btn-cancel">取消</button>
+        <button type="submit" class="btn-submit">保存</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- ====== Toast ====== -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/db.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

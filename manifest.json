@@ -1,0 +1,22 @@
+{
+  "name": "重要日子日历",
+  "short_name": "重要日子",
+  "description": "记录纪念日、生日等重要日子",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0b0b16",
+  "theme_color": "#f4a261",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
