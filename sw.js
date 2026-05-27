@@ -1,4 +1,4 @@
-const CACHE_NAME = 'important-dates-v3';
+const CACHE_NAME = 'important-dates-v4';
 const ASSETS = [
   '/',
   '/index.html',
@@ -7,7 +7,9 @@ const ASSETS = [
   '/js/db.js',
   '/manifest.json',
   '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/icons/icon-192-maskable.png',
+  '/icons/icon-512.png',
+  '/icons/icon-512-maskable.png'
 ];
 
 self.addEventListener('install', (event) => {
