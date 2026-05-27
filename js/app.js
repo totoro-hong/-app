@@ -732,7 +732,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-import').addEventListener('click', importData);
 
   // 一次性迁移：清除以前预置的测试数据
-  if (!localStorage.getItem('migrated_clear_seed')) {
+  if (!localStorage.getItem('migrated_clear_seed_v2')) {
     const all = await db.getAll();
     const seedNames = new Set([
       '恋爱纪念日','结婚纪念日','与挚友相识','家庭旅行','我的生日',
@@ -742,7 +742,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     for (const item of all) {
       if (seedNames.has(item.name)) await db.remove(item.id);
     }
-    localStorage.setItem('migrated_clear_seed', '1');
+    localStorage.setItem('migrated_clear_seed_v2', '1');
   }
 
   setupForm();
