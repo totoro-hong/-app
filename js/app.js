@@ -731,6 +731,20 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-export').addEventListener('click', exportData);
   document.getElementById('btn-import').addEventListener('click', importData);
 
+  // 一次性迁移：清除以前预置的测试数据
+  if (!localStorage.getItem('migrated_clear_seed')) {
+    const all = await db.getAll();
+    const seedNames = new Set([
+      '恋爱纪念日','结婚纪念日','与挚友相识','家庭旅行','我的生日',
+      '首马完赛','养了第一只猫','朋友生日','毕业纪念日','一起看演唱会',
+      '年度体检','项目截止日','老友聚会','家庭出游'
+    ]);
+    for (const item of all) {
+      if (seedNames.has(item.name)) await db.remove(item.id);
+    }
+    localStorage.setItem('migrated_clear_seed', '1');
+  }
+
   setupForm();
   render();
   setupSearch();
