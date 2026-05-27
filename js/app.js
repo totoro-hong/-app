@@ -400,7 +400,7 @@ function cardHTML(item, type, groupKey) {
       <div class="card-inner">
         ${timeHtml}
         <div class="card-name">${item.name}</div>
-        <div class="card-date">📅 ${subtitle}</div>
+        <div class="card-date">${subtitle}</div>
         ${item.note ? `<div class="card-note">${item.note}</div>` : ''}
         <div class="card-quote">${quote}</div>
       </div>
@@ -650,7 +650,6 @@ function setupFeedback() {
         statusEl.textContent = '✅ 感谢你的反馈！';
         statusEl.style.color = 'var(--forest)';
         document.getElementById('feedback-content').value = '';
-        document.getElementById('feedback-contact').value = '';
       } else {
         statusEl.textContent = '❌ ' + (data.error || '提交失败，请稍后再试');
         statusEl.style.color = 'var(--crimson)';
