@@ -718,40 +718,6 @@ function setupForm() {
   });
   document.getElementById('event-date').valueAsDate = new Date();
 }
-
-// ─── 测试数据 ────────────────────────────────────────
-
-async function seedTestData() {
-  const items = await db.getAll();
-  // 已有测试数据则跳过
-  if (items.some((i) => i.name === '首马完赛')) return;
-  // 有旧数据但无测试数据 → 不清除，仅追加
-  const exists = new Set(items.map((i) => i.name));
-
-  const testData = [
-    { name: '恋爱纪念日', date: '2023-05-20', type: 'passed', category: 'love', repeat: true },
-    { name: '结婚纪念日', date: '2022-10-01', type: 'passed', category: 'anniversary', repeat: true },
-    { name: '与挚友相识', date: '2016-09-01', type: 'passed', category: 'friendship', repeat: false },
-    { name: '家庭旅行', date: '2024-02-15', type: 'passed', category: 'family', repeat: false },
-    { name: '我的生日', date: '1995-08-15', type: 'passed', category: 'birthday', repeat: true },
-    { name: '首马完赛', date: '2025-01-10', type: 'passed', category: 'self', repeat: false },
-    { name: '养了第一只猫', date: '2023-11-01', type: 'passed', category: 'other', repeat: false },
-    { name: '朋友生日', date: '1996-07-15', type: 'upcoming', category: 'birthday', repeat: true },
-    { name: '毕业纪念日', date: '2020-06-15', type: 'upcoming', category: 'anniversary', repeat: true },
-    { name: '一起看演唱会', date: '2026-08-20', type: 'upcoming', category: 'love', repeat: false },
-    { name: '年度体检', date: '2026-06-01', type: 'upcoming', category: 'self', repeat: false },
-    { name: '项目截止日', date: '2026-06-30', type: 'upcoming', category: 'other', repeat: false },
-    { name: '老友聚会', date: '2026-07-01', type: 'upcoming', category: 'friendship', repeat: false },
-    { name: '家庭出游', date: '2026-08-10', type: 'upcoming', category: 'family', repeat: false }
-  ];
-
-  for (const data of testData) {
-    if (!exists.has(data.name)) {
-      await db.add(data);
-    }
-  }
-}
-
 // ─── 启动 ────────────────────────────────────────────
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -766,7 +732,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.getElementById('btn-import').addEventListener('click', importData);
 
   setupForm();
-  await seedTestData();
   render();
   setupSearch();
   setupFeedback();
